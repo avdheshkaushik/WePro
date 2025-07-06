@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: wepro_postgres
+    environment:
+      POSTGRES_DB: wepro_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - wepro_network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: wepro_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - wepro_network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: wepro_backend
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=wepro_db
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=dev-jwt-secret-key
+      - JWT_REFRESH_SECRET=dev-refresh-secret-key
+      - PORT=3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - wepro_network
+    command: npm run dev
+
+  # Frontend Web App
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: wepro_web
+    environment:
+      - REACT_APP_API_URL=http://localhost:3000/api
+      - REACT_APP_WS_URL=ws://localhost:3000
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - wepro_network
+
+  # AI Service
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    container_name: wepro_ai_service
+    environment:
+      - PYTHONPATH=/app
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/wepro_db
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./ai-service:/app
+    depends_on:
+      - postgres
+    networks:
+      - wepro_network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  wepro_network:
+    driver: bridge 

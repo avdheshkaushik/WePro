@@ -1,0 +1,20 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const task_controller_1 = require("../controllers/task.controller");
+const auth_middleware_1 = require("../middleware/auth.middleware");
+const router = (0, express_1.Router)();
+router.use(auth_middleware_1.authenticateToken);
+router.get('/', task_controller_1.TaskController.getTasks);
+router.post('/', task_controller_1.TaskController.createTask);
+router.get('/:id', task_controller_1.TaskController.getTaskById);
+router.put('/:id', task_controller_1.TaskController.updateTask);
+router.delete('/:id', task_controller_1.TaskController.deleteTask);
+router.post('/:id/assign', task_controller_1.TaskController.assignTask);
+router.post('/:id/status', task_controller_1.TaskController.updateTaskStatus);
+router.get('/:id/comments', task_controller_1.TaskController.getTaskComments);
+router.post('/:id/comments', task_controller_1.TaskController.addTaskComment);
+router.get('/:id/attachments', task_controller_1.TaskController.getTaskAttachments);
+router.post('/:id/attachments', task_controller_1.TaskController.uploadAttachment);
+exports.default = router;
+//# sourceMappingURL=task.routes.js.map

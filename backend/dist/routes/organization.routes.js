@@ -1,0 +1,20 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const organization_controller_1 = require("../controllers/organization.controller");
+const auth_middleware_1 = require("../middleware/auth.middleware");
+const router = (0, express_1.Router)();
+router.use(auth_middleware_1.authenticateToken);
+router.get('/', organization_controller_1.OrganizationController.getOrganizations);
+router.post('/', organization_controller_1.OrganizationController.createOrganization);
+router.get('/:id', organization_controller_1.OrganizationController.getOrganizationById);
+router.put('/:id', organization_controller_1.OrganizationController.updateOrganization);
+router.delete('/:id', organization_controller_1.OrganizationController.deleteOrganization);
+router.get('/:id/members', organization_controller_1.OrganizationController.getOrganizationMembers);
+router.post('/:id/members', organization_controller_1.OrganizationController.addOrganizationMember);
+router.patch('/:id/members/:memberId/role', organization_controller_1.OrganizationController.updateMemberRole);
+router.delete('/:id/members/:memberId', organization_controller_1.OrganizationController.removeOrganizationMember);
+router.get('/:id/workspaces', organization_controller_1.OrganizationController.getOrganizationWorkspaces);
+router.post('/:id/workspaces', organization_controller_1.OrganizationController.createWorkspace);
+exports.default = router;
+//# sourceMappingURL=organization.routes.js.map
