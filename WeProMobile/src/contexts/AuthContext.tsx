@@ -66,13 +66,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setIsLoading(true);
       const response = await api.post('/auth/login', { email, password });
-      const { user: userData, token } = response.data;
+      const { data } = response.data;
+      
+      // Transform backend response to match frontend expectations
+      const userData = {
+        id: data.user.id,
+        email: data.user.email,
+        firstName: data.user.first_name,
+        lastName: data.user.last_name,
+        organizationId: data.user.organization_id
+      };
 
       setUser(userData);
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
       
       await AsyncStorage.setItem('@WePro:user', JSON.stringify(userData));
-      await AsyncStorage.setItem('@WePro:token', token);
+      await AsyncStorage.setItem('@WePro:token', data.token);
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -84,14 +93,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (userData: RegisterData) => {
     try {
       setIsLoading(true);
-      const response = await api.post('/auth/register', userData);
-      const { user: newUser, token } = response.data;
+      
+      // Transform field names to match backend expectations
+      const requestData = {
+        email: userData.email,
+        password: userData.password,
+        first_name: userData.firstName,
+        last_name: userData.lastName
+      };
+      
+      const response = await api.post('/auth/register', requestData);
+      const { data } = response.data;
+      
+      // Transform backend response to match frontend expectations
+      const newUser = {
+        id: data.user.id,
+        email: data.user.email,
+        firstName: data.user.first_name,
+        lastName: data.user.last_name,
+        organizationId: data.user.organization_id
+      };
 
       setUser(newUser);
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
       
       await AsyncStorage.setItem('@WePro:user', JSON.stringify(newUser));
-      await AsyncStorage.setItem('@WePro:token', token);
+      await AsyncStorage.setItem('@WePro:token', data.token);
     } catch (error) {
       console.error('Registration error:', error);
       throw error;

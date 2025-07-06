@@ -1,11 +1,6 @@
-import { Pool } from 'pg';
 import bcrypt from 'bcryptjs';
 import { createError } from '../middleware/error.middleware';
-
-// Database connection
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
+import { pool } from '../config/database';
 
 export interface User {
   id: string;

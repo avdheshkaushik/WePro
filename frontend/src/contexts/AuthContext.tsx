@@ -62,10 +62,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string) => {
     try {
       const response = await axios.post('/auth/login', { email, password });
-      const { token, user: userData } = response.data;
+      const { data } = response.data;
       
-      localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      // Transform backend response to match frontend expectations
+      const userData = {
+        id: data.user.id,
+        email: data.user.email,
+        firstName: data.user.first_name,
+        lastName: data.user.last_name,
+        organizationId: data.user.organization_id
+      };
+      
+      localStorage.setItem('token', data.token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
       setUser(userData);
     } catch (error) {
       console.error('Login error:', error);
@@ -75,11 +84,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (userData: RegisterData) => {
     try {
-      const response = await axios.post('/auth/register', userData);
-      const { token, user: newUser } = response.data;
+      // Transform field names to match backend expectations
+      const requestData = {
+        email: userData.email,
+        password: userData.password,
+        first_name: userData.firstName,
+        last_name: userData.lastName
+      };
       
-      localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      const response = await axios.post('/auth/register', requestData);
+      const { data } = response.data;
+      
+      // Transform backend response to match frontend expectations
+      const newUser = {
+        id: data.user.id,
+        email: data.user.email,
+        firstName: data.user.first_name,
+        lastName: data.user.last_name,
+        organizationId: data.user.organization_id
+      };
+      
+      localStorage.setItem('token', data.token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
       setUser(newUser);
     } catch (error) {
       console.error('Registration error:', error);
