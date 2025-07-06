@@ -165,5 +165,3 @@ For support, email support@wepro.com or join our Slack channel.
 - [ ] Advanced analytics dashboard
 - [ ] API marketplace # WePro
 # WePro
-# WePro
-# WePro
